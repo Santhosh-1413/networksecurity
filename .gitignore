@@ -1,0 +1,12 @@
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+logs/
+Artifacts/
+*.egg-info/
+dist/
+build/
+prediction_output/
+valid_data/
