@@ -6,12 +6,14 @@ from networksecurity.components.data_ingestion import DataIngestion
 from networksecurity.components.data_validation import DataValidation
 from networksecurity.components.data_transformation import DataTransformation
 from networksecurity.components.model_trainer import ModelTrainer
+from networksecurity.components.model_pusher import ModelPusher
 from networksecurity.entity.config_entity import (
     TrainingPipelineConfig,
     DataIngestionConfig,
     DataValidationConfig,
     DataTransformationConfig,
     ModelTrainerConfig,
+    ModelPusherConfig,
 )
 
 class TrainingPipeline:
@@ -74,6 +76,21 @@ class TrainingPipeline:
             return model_trainer_artifact
         except Exception as e:
             raise NetworkSecurityException(e, sys)
+    
+    def start_model_pusher(self, model_trainer_artifact):
+        try:
+            model_pusher_config = ModelPusherConfig(
+                training_pipeline_config=self.training_pipeline_config
+            )
+            model_pusher = ModelPusher(
+                model_pusher_config=model_pusher_config,
+                model_trainer_artifact=model_trainer_artifact
+            )
+            model_pusher_artifact = model_pusher.initiate_model_pusher()
+            logging.info(f"Model Pusher completed: {model_pusher_artifact}")
+            return model_pusher_artifact
+        except Exception as e:
+            raise NetworkSecurityException(e, sys)
 
     def run_pipeline(self):
         try:
@@ -81,6 +98,7 @@ class TrainingPipeline:
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(data_validation_artifact)
             model_trainer_artifact = self.start_model_trainer(data_transformation_artifact)
-            return model_trainer_artifact
+            model_pusher_artifact = self.start_model_pusher(model_trainer_artifact)
+            return model_pusher_artifact
         except Exception as e:
             raise NetworkSecurityException(e, sys)

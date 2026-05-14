@@ -98,3 +98,22 @@ class ModelTrainerConfig:
         )
         self.expected_accuracy: float = MODEL_TRAINER_EXPECTED_SCORE
         self.overfitting_underfitting_threshold: float = MODEL_TRAINER_OVER_FITTING_UNDER_FITTING_THRESHOLD
+
+
+@dataclass
+class ModelPusherConfig:
+    training_pipeline_config: TrainingPipelineConfig = None
+    
+    def __post_init__(self):
+        import os
+        from datetime import datetime
+        
+        self.bucket_name: str = os.getenv("MODEL_BUCKET_NAME", "networksecurity-models")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # S3 paths for model artifacts
+        self.s3_model_key_path: str = f"models/{timestamp}/model.pkl"
+        self.s3_preprocessor_key_path: str = f"models/{timestamp}/preprocessor.pkl"
+        
+        # Local paths
+        self.preprocessor_path: str = "final_model/preprocessor.pkl"
